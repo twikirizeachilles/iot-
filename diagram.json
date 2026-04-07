@@ -18,3 +18,26 @@
       "left": -63.4,
       "attrs": { "color": "red" }
     },
+
+    {
+      "type": "wokwi-pir-motion-sensor",
+      "id": "pir1",
+      "top": -15.2,
+      "left": -132.18,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-gas-sensor",
+      "id": "gas1",
+      "top": -6.9,
+      "left": 122.2,
+      "rotate": 90,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "bz1",
+      "top": 146.4,
+      "left": 165,
+      "attrs": { "volume": "0.1" }
+    },
