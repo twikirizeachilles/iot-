@@ -66,4 +66,59 @@ void setup() {
   pinMode(BUZZER_PIN, OUTPUT);
   pinMode(RED_LED_PIN, OUTPUT);
 
+  // Connect to WiFi
+  Serial.print("Connecting to WiFi");
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi connected! IP: " + WiFi.localIP().toString());
+}
+
+void loop() {
+  int motionDetected = digitalRead(PIR_PIN);
+  int smokeLevel = analogRead(SMOKE_PIN);
+  unsigned long now = millis();
+
+  // Motion detection - control light
+  if (motionDetected == HIGH) {
+    digitalWrite(LIGHT_PIN, HIGH);
+    Serial.println("Motion detected - Light ON");
+
+    // Send email alert with cooldown
+    if (now - lastMotionEmail > EMAIL_COOLDOWN) {
+      sendEmail(
+        "⚠️ Motion Alert!",
+        "Motion has been detected by your ESP32 sensor system. The light has been turned ON."
+      );
+      lastMotionEmail = now;
+    }
+  } else {
+    digitalWrite(LIGHT_PIN, LOW);
+  }
+
+  // Smoke detection - trigger alarm
+  if (smokeLevel > SMOKE_THRESHOLD) {
+    digitalWrite(BUZZER_PIN, HIGH);
+    digitalWrite(RED_LED_PIN, HIGH);
+    Serial.print("Smoke detected! Level: ");
+    Serial.println(smokeLevel);
+
+    // Send email alert with cooldown
+    if (now - lastSmokEmail > EMAIL_COOLDOWN) {
+      sendEmail(
+        "🚨 Smoke Alert!",
+        "Smoke has been detected! Smoke level: " + String(smokeLevel) + ". Please check immediately!"
+      );
+      lastSmokEmail = now;
+    }
+  } else {
+    digitalWrite(BUZZER_PIN, LOW);
+    digitalWrite(RED_LED_PIN, LOW);
+  }
+
+  delay(200);
+}
+
 
