@@ -21,3 +21,49 @@ const int RED_LED_PIN = 27;
 
 // Smoke threshold
 const int SMOKE_THRESHOLD = 400;
+
+// Cooldown to avoid repeated emails (ms)
+const unsigned long EMAIL_COOLDOWN = 30000;
+unsigned long lastSmokEmail = 0;
+unsigned long lastMotionEmail = 0;
+
+SMTPSession smtp;
+
+void sendEmail(String subject, String body) {
+  ESP_Mail_Session session;
+  session.server.host_name = SMTP_HOST;
+  session.server.port = SMTP_PORT;
+  session.login.email = SENDER_EMAIL;
+  session.login.password = SENDER_PASSWORD;
+  session.login.user_domain = "";
+
+  SMTP_Message message;
+  message.sender.name = "ESP32 Alert System";
+  message.sender.email = SENDER_EMAIL;
+  message.subject = subject;
+  message.addRecipient("Recipient", RECIPIENT_EMAIL);
+  message.text.content = body.c_str();
+
+  if (!smtp.connect(&session)) {
+    Serial.println("SMTP connection failed!");
+    return;
+  }
+
+  if (!MailClient.sendMail(&smtp, &message)) {
+    Serial.println("Email send failed: " + smtp.errorReason());
+  } else {
+    Serial.println("Email sent successfully!");
+  }
+
+  smtp.closeSession();
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(PIR_PIN, INPUT);
+  pinMode(LIGHT_PIN, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(RED_LED_PIN, OUTPUT);
+
+
